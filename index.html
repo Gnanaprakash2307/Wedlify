@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login • Wedlify</title>
+  <style>
+    :root {
+      --accent:#6c5ce7; --accent-2:#00d2d3; --bg:#0f1226; --fg:#eaeaf7; --muted:#b5b7d3; --border:#262a4d; --surface:#161a36; --surface-2:#1e2348; --shadow: 0 6px 30px rgba(0,0,0,0.25);
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:radial-gradient(1200px 600px at 10% -10%, rgba(108,92,231,.25), transparent), radial-gradient(1200px 600px at 90% -10%, rgba(0,210,211,.25), transparent), var(--bg); color:var(--fg); min-height:100vh; display:grid; place-items:center; padding:24px; }
+    .panel { width:100%; max-width: 760px; background: linear-gradient(180deg, var(--surface), var(--surface-2)); border:1px solid var(--border); border-radius:16px; box-shadow: var(--shadow); display:grid; grid-template-columns: 1fr 1fr; overflow:hidden; }
+    .side { padding:20px; border-right:1px solid var(--border); }
+    .content { padding:20px; }
+    h1 { margin:0 0 8px; }
+    p.muted { color:var(--muted); margin:0 0 16px; }
+    form { display:grid; gap:10px; }
+    input, select { padding:10px 12px; border:1px solid var(--border); background: var(--surface); color: var(--fg); border-radius:10px; width:100%; }
+    .btn { background:linear-gradient(135deg, var(--accent), #8e79ff); color:#fff; border:none; padding:10px 14px; border-radius:10px; cursor:pointer; }
+    .row { display:flex; gap:8px; align-items:center; }
+    .link { color:#9aa1ff; text-decoration:none; }
+    .center { text-align:center; margin-top:10px; }
+    @media (max-width: 800px) { .panel { grid-template-columns: 1fr; } .side { border-right:none; border-bottom:1px solid var(--border); } }
+  </style>
+  <script>
+    const storage = {
+      get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
+      set(key, value) { localStorage.setItem(key, JSON.stringify(value)); },
+    };
+    function nowUser() { return storage.get('current_user', null); }
+    function ensureSeedUsers() {
+      if (!storage.get('wedlify_seeded', false)) {
+        // If index hasn't been opened yet, ensure minimal seed here
+        storage.set('users', [{ id:'u_admin', name:'Admin', email:'admin@wedlify.test', password:'admin', role:'admin' }]);
+        storage.set('wedlify_seeded', true);
+      }
+    }
+    function tryLogin(email, password) {
+      const users = storage.get('users', []);
+      const found = users.find(u => u.email === email && u.password === password);
+      if (found) { storage.set('current_user', found); return { ok:true, user:found }; }
+      return { ok:false, message:'Invalid credentials' };
+    }
+    function tryRegister(name, email, password, role) {
+      const users = storage.get('users', []);
+      if (users.some(u => u.email === email)) return { ok:false, message:'Email already used' };
+      const user = { id: 'u_'+Date.now(), name, email, password, role };
+      users.push(user); storage.set('users', users); storage.set('current_user', user);
+      return { ok:true, user };
+    }
+    function redirectToDashboard() { location.href = 'dashboard.html'; }
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const res = tryLogin(email, password);
+      if (!res.ok) return alert(res.message);
+      redirectToDashboard();
+    }
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('r_name').value.trim();
+      const email = document.getElementById('r_email').value.trim();
+      const password = document.getElementById('r_password').value;
+      const role = document.getElementById('r_role').value;
+      const res = tryRegister(name, email, password, role);
+      if (!res.ok) return alert(res.message);
+      redirectToDashboard();
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      ensureSeedUsers();
+      if (nowUser()) redirectToDashboard();
+    });
+  </script>
+</head>
+<body>
+  <div class="panel">
+    <div class="side">
+      <h1>Welcome back</h1>
+      <p class="muted">Sign in to manage your bookings and services.</p>
+      <form onsubmit="handleLogin(event)">
+        <input id="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Password" />
+        <button class="btn" type="submit">Login</button>
+      </form>
+      <div class="center"><a class="link" href="dashboard.html">← Back to Home</a></div>
+    </div>
+    <div class="content">
+      <h1>Create account</h1>
+      <p class="muted">New to Wedlify? Create an account to get started.</p>
+      <form onsubmit="handleRegister(event)">
+        <input id="r_name" placeholder="Name" />
+        <input id="r_email" placeholder="Email" />
+        <input id="r_password" type="password" placeholder="Password" />
+        <div class="row">
+          <select id="r_role">
+            <option value="organizer" selected>Organizer</option>
+            <option value="student">Student</option>
+            <option value="chef">Chef</option>
+          </select>
+        </div>
+        <button class="btn" type="submit">Create account</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
