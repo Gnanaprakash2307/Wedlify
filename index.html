@@ -3,106 +3,914 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login • Wedlify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='48' x='8' font-size='48'%3E%F0%9F%92%BC%3C/text%3E%3C/svg%3E">
+  
+  <title>Wedlify Jobs • Find Your Next Opportunity</title>
+  <meta name="description" content="Wedlify Jobs — Find part-time jobs for students near you.">
+  <meta name="theme-color" content="#C7A008">
+  <meta property="og:title" content="Wedlify Jobs">
+  <meta property="og:description" content="Find part-time and quick-shift jobs in your city.">
+  <meta property="og:image" content="https://wedlify-jobs.web.app/preview.png">
+
   <style>
     :root {
-      --accent:#6c5ce7; --accent-2:#00d2d3; --bg:#0f1226; --fg:#eaeaf7; --muted:#b5b7d3; --border:#262a4d; --surface:#161a36; --surface-2:#1e2348; --shadow: 0 6px 30px rgba(0,0,0,0.25);
+      --accent:#C7A008; --accent-2:#800020; --accent-3:#00BFA6;
+      --bg:#0f1226; --fg:#eaeaf7; --muted:#b5b7d3; --border:#262a4d;
+      --surface:#161a36; --surface-2:#1e2348; --shadow: 0 10px 40px rgba(0,0,0,0.35);
+      --success: #1db954; --error: #d92121;
     }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:radial-gradient(1200px 600px at 10% -10%, rgba(108,92,231,.25), transparent), radial-gradient(1200px 600px at 90% -10%, rgba(0,210,211,.25), transparent), var(--bg); color:var(--fg); min-height:100vh; display:grid; place-items:center; padding:24px; }
-    .panel { width:100%; max-width: 760px; background: linear-gradient(180deg, var(--surface), var(--surface-2)); border:1px solid var(--border); border-radius:16px; box-shadow: var(--shadow); display:grid; grid-template-columns: 1fr 1fr; overflow:hidden; }
-    .side { padding:20px; border-right:1px solid var(--border); }
-    .content { padding:20px; }
-    h1 { margin:0 0 8px; }
-    p.muted { color:var(--muted); margin:0 0 16px; }
-    form { display:grid; gap:10px; }
-    input, select { padding:10px 12px; border:1px solid var(--border); background: var(--surface); color: var(--fg); border-radius:10px; width:100%; }
-    .btn { background:linear-gradient(135deg, var(--accent), #8e79ff); color:#fff; border:none; padding:10px 14px; border-radius:10px; cursor:pointer; }
-    .row { display:flex; gap:8px; align-items:center; }
-    .link { color:#9aa1ff; text-decoration:none; }
-    .center { text-align:center; margin-top:10px; }
-    @media (max-width: 800px) { .panel { grid-template-columns: 1fr; } .side { border-right:none; border-bottom:1px solid var(--border); } }
+    html[data-theme="light"] {
+      --accent:#a68607; --accent-2:#800020; --accent-3:#008c7a;
+      --bg:#f5f5fa; --fg:#111827; --muted:#6b7280; --border:#e5e7eb;
+      --surface:#ffffff; --surface-2:#f9fafb; --shadow: 0 10px 40px rgba(0,0,0,0.1);
+      --success: #16a34a; --error: #dc2626;
+    }
+    * { box-sizing:border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color:var(--fg); min-height:100vh; transition: background .3s ease, color .3s ease; }
+    h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing:.2px; }
+    a { color: var(--accent); cursor: pointer; }
+    main { padding-bottom: 80px; }
+
+    /* --- Views --- */
+    #auth_view, #app_view, #onboarding_splash { display: none; }
+    #auth_view.active, #onboarding_splash.active { display: flex; }
+    #app_view.active { display: flex; }
+    #signup_form { display: none; }
+
+    /* --- Onboarding Splash --- */
+    #onboarding_splash { position:fixed; inset:0; z-index:200; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; 
+      background: linear-gradient(-45deg, var(--bg), var(--surface), var(--bg), var(--surface-2));
+      background-size: 400% 400%;
+      animation: fadeIn .5s ease, subtle-gradient 15s ease infinite;
+    }
+    .onboarding-content { max-width: 400px; }
+    .onboarding-content h1 { font-size: 44px; margin-bottom: 12px; }
+    .onboarding-content p { color: var(--muted); font-size: 18px; margin-bottom: 32px; }
+    #onboarding_splash.fading-out { animation: fadeOutSplash 0.4s ease-out forwards; }
+
+    /* --- Auth View --- */
+    #auth_view { align-items:center; justify-content:center; min-height:100vh; padding:16px; animation:fadeIn .5s ease; }
+    .login-panel { width:100%; max-width:400px; background:linear-gradient(180deg, var(--surface), var(--surface-2)); border:1px solid var(--border); border-radius:18px; padding:24px; box-shadow: var(--shadow); }
+
+    /* --- UI Elements --- */
+    .btn { font-family:'Poppins', sans-serif; background-image: linear-gradient(135deg, var(--accent), #e7cc55); color:#111; font-weight:600; border:none; padding:10px 14px; border-radius:12px; cursor:pointer; transition: all .25s ease; box-shadow: 0 6px 16px rgba(199,160,8,.25); text-decoration: none; display: inline-block; text-align: center; }
+    .btn:hover { filter: brightness(1.05); box-shadow: 0 8px 20px rgba(199,160,8,.35); transform: translateY(-2px); }
+    .btn:active { transform: translateY(1px); }
+    .btn.full { width: 100%; }
+    .btn.alt { background-image: linear-gradient(135deg, var(--accent-3), #51e6d1); color:#111; box-shadow: 0 6px 16px rgba(0,191,166,.35); }
+    .btn.icon-btn { padding: 8px; font-size: 1.2rem; line-height: 1; border-radius: 50%; width: 40px; height: 40px; }
+    .btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; filter: none; }
+    input, select, textarea { padding:12px; border:1px solid var(--border); background: var(--surface); color: var(--fg); border-radius:12px; width:100%; font-family:'Poppins', sans-serif; font-size: 1rem; transition: all .3s ease; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+    form { display:grid; gap:12px; }
+    label { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .muted { color:var(--muted); font-size:13px; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; border:1px solid var(--border); background: color-mix(in srgb, var(--fg) 4%, transparent); font-size:12px; font-weight: 500; }
+    .pill.spot { background-color: #16a34a20; color: #16a34a; border-color: #16a34a50; }
+    html[data-theme="dark"] .pill.spot { color: #4ade80; }
+    .pill.next-day { background-color: #f59e0b20; color: #f59e0b; border-color: #f59e0b50; }
+    html[data-theme="dark"] .pill.next-day { color: #facc15; }
+    .pill.monthly { background-color: #3b82f620; color: #3b82f6; border-color: #3b82f650; }
+    html[data-theme="dark"] .pill.monthly { color: #60a5fa; }
+    .pill.available { background-color: var(--accent-3); color: var(--bg); border: none; }
+
+    /* --- Navigation --- */
+    .desktop-nav { display:flex; flex-wrap:wrap; gap:8px 16px; padding:12px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--surface) 75%, transparent); backdrop-filter: blur(10px); }
+    .desktop-nav a { text-decoration:none; color:var(--fg); padding:8px 12px; border-radius:10px; transition: all .25s ease; white-space:nowrap; font-weight: 500; }
+    .desktop-nav a.active, .desktop-nav a:hover { background:color-mix(in srgb, var(--fg) 6%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent); transform: translateY(-1px); }
+    .spacer { margin-left:auto; }
+    .theme-toggle { background: transparent; border: none; color: var(--fg); cursor: pointer; font-size: 1.5rem; padding: 4px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: transform .3s ease, color .3s ease; }
+    .theme-toggle:hover { transform: rotate(20deg); }
+    .mobile-nav { display: none; }
+
+    /* --- Main Content --- */
+    #app_view { flex-direction: column; min-height: 100vh; }
+    main { padding:24px; max-width:1200px; margin:0 auto; width:100%; flex: 1; }
+    .hero { text-align:center; padding:64px 16px; border:1px solid var(--border); border-radius:18px; background:
+      radial-gradient(600px 240px at 20% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent),
+      radial-gradient(600px 240px at 80% 0%, color-mix(in srgb, var(--accent-3) 18%, transparent), transparent),
+      linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 70%, transparent), color-mix(in srgb, var(--surface) 70%, transparent));
+      box-shadow: var(--shadow); }
+    .hero h1 { font-size:44px; margin:0 0 12px; }
+    .hero p { color:var(--muted); margin:0; font-size:16px; }
+    .kicker { color: var(--accent-3); font-weight:600; letter-spacing:.3px; text-transform: uppercase; font-size:12px; margin-bottom: 8px; }
+
+    /* Grid & Cards */
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px; }
+    .card { border:1px solid var(--border); background:linear-gradient(160deg, var(--surface), var(--surface-2)); border-radius:16px; padding:20px; box-shadow: var(--shadow); transition: transform .25s ease, box-shadow .25s ease; display:flex; flex-direction:column; gap:12px; }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 0 25px color-mix(in srgb, var(--accent) 15%, transparent), 0 16px 50px color-mix(in srgb, var(--bg) 55%, black); }
+    .job-card p { white-space: pre-wrap; color: var(--muted); line-height: 1.6; font-size: 14px; }
+    .job-card .card-footer { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .map-preview { border-radius: 8px; border: 1px solid var(--border); width: 100%; aspect-ratio: 16/9; }
+    .bookmark-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.5rem; transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding: 0; }
+    .bookmark-btn:hover { color: var(--accent); transform: scale(1.1); }
+    .bookmark-btn.bookmarked { color: var(--accent); transform: scale(1.2); }
+
+    /* Profile Card */
+    .profile-card { text-align: center; }
+    .profile-card img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent); margin-bottom: 12px; object-fit: cover; }
+    .profile-card .skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    
+    /* Shimmer Loader */
+    .shimmer-card { pointer-events: none; }
+    .shimmer { background: var(--surface-2); background-image: linear-gradient(to right, var(--surface-2) 0%, var(--border) 20%, var(--surface-2) 40%, var(--surface-2) 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s linear infinite; border-radius: 8px; opacity: 0.7; }
+
+    /* --- Sections & Filters --- */
+    .section { display:none; }
+    .section.active { display:block; animation: fadeIn .5s ease; }
+    .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; background: var(--surface); padding: 16px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 24px; }
+    #jobs.active .filters { animation: slideDown 0.6s ease-out forwards; }
+    .dashboard-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .dashboard-tabs button { background: none; border: none; color: var(--muted); padding: 12px 16px; cursor: pointer; font-size: 1rem; font-weight: 500; border-bottom: 2px solid transparent; transition: all .2s ease; }
+    .dashboard-tabs button.active { color: var(--fg); border-bottom-color: var(--accent); }
+
+    /* --- Floating Action Button --- */
+    #post_job_fab { position: fixed; bottom: 96px; right: 24px; width: 56px; height: 56px; border-radius: 50%; font-size: 28px; display: none; align-items: center; justify-content: center; z-index: 50; }
+    #post_job_fab.visible { display: flex; animation: pulse 3s infinite cubic-bezier(0.4, 0, 0.6, 1); }
+
+    /* --- Toast Notifications --- */
+    .toast-wrap { position: fixed; left:50%; transform: translateX(-50%); bottom:24px; z-index:100; display:flex; flex-direction:column; gap:8px; align-items: center; pointer-events: none; }
+    .toast { color:#fff; padding:10px 16px; border-radius:999px; box-shadow: 0 10px 30px rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); font-weight:600; animation: toastIn .3s ease; }
+    .toast.success { background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 80%, white)); }
+    .toast.error { background: linear-gradient(135deg, var(--error), color-mix(in srgb, var(--error) 80%, white)); }
+
+    /* --- Animations --- */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeOutSplash { to { opacity: 0; transform: scale(0.95); } }
+    @keyframes subtle-gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateY(6px); } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 6px 16px rgba(199,160,8,.25); } 50% { transform: scale(1.1); box-shadow: 0 8px 24px rgba(199,160,8,.45); } 100% { transform: scale(1); box-shadow: 0 6px 16px rgba(199,160,8,.25); } }
+    @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+
+    /* --- Footer --- */
+    footer { text-align:center; padding:32px 16px; color:var(--muted); margin-top: auto; font-size: 14px; }
+
+    /* --- Responsive Design --- */
+    @media (max-width: 768px) {
+      .hero h1 { font-size:34px; }
+      main { padding: 16px; padding-bottom: 96px;}
+      .desktop-nav { display: none; }
+      .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(10px); border-top: 1px solid var(--border); justify-content: space-around; padding: 8px 0; z-index: 100; }
+      .mobile-nav a { flex: 1; text-align: center; color: var(--muted); text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; }
+      .mobile-nav a .icon { font-size: 24px; }
+      .mobile-nav a.active { color: var(--accent); }
+      #post_job_fab { bottom: 80px; right: 16px; }
+      .toast-wrap { bottom: 80px; }
+    }
   </style>
-  <script>
-    const storage = {
-      get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
-      set(key, value) { localStorage.setItem(key, JSON.stringify(value)); },
-    };
-    function nowUser() { return storage.get('current_user', null); }
-    function ensureSeedUsers() {
-      if (!storage.get('wedlify_seeded', false)) {
-        // If index hasn't been opened yet, ensure minimal seed here
-        storage.set('users', [{ id:'u_admin', name:'Admin', email:'admin@wedlify.test', password:'admin', role:'admin' }]);
-        storage.set('wedlify_seeded', true);
-      }
-    }
-    function tryLogin(email, password) {
-      const users = storage.get('users', []);
-      const found = users.find(u => u.email === email && u.password === password);
-      if (found) { storage.set('current_user', found); return { ok:true, user:found }; }
-      return { ok:false, message:'Invalid credentials' };
-    }
-    function tryRegister(name, email, password, role) {
-      const users = storage.get('users', []);
-      if (users.some(u => u.email === email)) return { ok:false, message:'Email already used' };
-      const user = { id: 'u_'+Date.now(), name, email, password, role };
-      users.push(user); storage.set('users', users); storage.set('current_user', user);
-      return { ok:true, user };
-    }
-    function redirectToDashboard() { location.href = 'dashboard.html'; }
-    function handleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const res = tryLogin(email, password);
-      if (!res.ok) return alert(res.message);
-      redirectToDashboard();
-    }
-    function handleRegister(e) {
-      e.preventDefault();
-      const name = document.getElementById('r_name').value.trim();
-      const email = document.getElementById('r_email').value.trim();
-      const password = document.getElementById('r_password').value;
-      const role = document.getElementById('r_role').value;
-      const res = tryRegister(name, email, password, role);
-      if (!res.ok) return alert(res.message);
-      redirectToDashboard();
-    }
-    window.addEventListener('DOMContentLoaded', () => {
-      ensureSeedUsers();
-      if (nowUser()) redirectToDashboard();
-    });
-  </script>
 </head>
 <body>
-  <div class="panel">
-    <div class="side">
-      <h1>Welcome back</h1>
-      <p class="muted">Sign in to manage your bookings and services.</p>
-      <form onsubmit="handleLogin(event)">
-        <input id="email" placeholder="Email" />
-        <input id="password" type="password" placeholder="Password" />
-        <button class="btn" type="submit">Login</button>
-      </form>
-      <div class="center"><a class="link" href="dashboard.html">← Back to Home</a></div>
-    </div>
-    <div class="content">
-      <h1>Create account</h1>
-      <p class="muted">New to Wedlify? Create an account to get started.</p>
-      <form onsubmit="handleRegister(event)">
-        <input id="r_name" placeholder="Name" />
-        <input id="r_email" placeholder="Email" />
-        <input id="r_password" type="password" placeholder="Password" />
-        <div class="row">
-          <select id="r_role">
-            <option value="organizer" selected>Organizer</option>
-            <option value="student">Student</option>
-            <option value="chef">Chef</option>
-          </select>
-        </div>
-        <button class="btn" type="submit">Create account</button>
-      </form>
+
+  <div id="onboarding_splash" class="active">
+    <div class="onboarding-content">
+      <h1>💼</h1>
+      <h1>Welcome to Wedlify Jobs</h1>
+      <p>Find nearby part-time jobs, apply instantly, and get paid daily. Your next opportunity is just a click away.</p>
+      <button class="btn" id="start_onboarding_btn">Get Started</button>
     </div>
   </div>
+
+  <div id="auth_view">
+    <div class="login-panel">
+      <h1 style="text-align:center;">💼 Wedlify Jobs</h1>
+      <p class="muted" style="text-align:center; margin-bottom:24px;">Login or sign up to find your next opportunity.</p>
+      
+      <form id="login_form">
+        <input id="login_email" type="email" placeholder="Email" required autocomplete="email">
+        <input id="login_password" type="password" placeholder="Password" required autocomplete="current-password">
+        <button class="btn full" type="submit">Login</button>
+        <p class="muted" style="text-align:center; margin-top:8px;">
+          No account? <a id="show_signup">Create one</a>
+        </p>
+      </form>
+
+      <form id="signup_form">
+        <input id="signup_name" type="text" placeholder="Full Name" required autocomplete="name">
+        <input id="signup_email" type="email" placeholder="Email" required autocomplete="email">
+        <input id="signup_password" type="password" placeholder="Password" required autocomplete="new-password">
+        <select id="signup_role" required>
+          <option value="">I am a...</option>
+          <option value="user">Job Seeker</option>
+          <option value="giver">Job Giver</option>
+        </select>
+        <button class="btn full" type="submit">Create Account</button>
+        <p class="muted" style="text-align:center; margin-top:8px;">
+          Already have an account? <a id="show_login">Login</a>
+        </p>
+      </form>
+
+    </div>
+  </div>
+  
+  <div id="app_view">
+    <nav class="desktop-nav">
+      <a href="#" data-section="home">💼 <strong>Wedlify</strong></a>
+      <a href="#" data-section="jobs">Jobs</a>
+      <a href="#" data-section="post_job" class="role-giver" style="display:none;">Post Job</a>
+      <a href="#" data-section="dashboard">Dashboard</a>
+      <a href="#" data-section="profile">Profile</a>
+      <span class="spacer"></span>
+      <button id="theme_toggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+      <a href="#" id="logout_button">Logout</a>
+    </nav>
+
+    <main>
+      <section id="home" class="section">
+        <div class="hero">
+          <div id="welcome_kicker" class="kicker">WELCOME</div>
+          <h1 id="welcome_heading">Find Your Next Opportunity</h1>
+          <p id="welcome_subheading">Browse part-time jobs, apply instantly, and get hired fast.</p>
+        </div>
+      </section>
+
+      <section id="jobs" class="section">
+        <h2>Available Jobs</h2>
+        <div class="filters" style="margin-top:18px">
+            <input type="text" id="search_box" placeholder="Search jobs...">
+            <select id="filter_location"><option value="">All Locations</option></select>
+            <select id="filter_pay"><option value="">Any Pay</option><option value="500">Up to ₹500</option><option value="1000">Up to ₹1000</option><option value="1001">₹1000+</option></select>
+            <select id="filter_timing"><option value="">Any Time</option><option value="morning">Morning</option><option value="night">Night</option><option value="full-day">Full Day</option></select>
+            <select id="filter_gender"><option value="">Any Gender</option><option value="male">Male</option><option value="female">Female</option></select>
+        </div>
+        <p id="jobs_count" class="muted" style="margin-top: -12px; margin-bottom: 24px; text-align: right;"></p>
+        <div id="jobs_list" class="grid"></div>
+      </section>
+
+      <section id="post_job" class="section">
+        <h2>Post a New Job</h2>
+        <p class="muted">Fill out the details below to publish a new job listing.</p>
+        <form id="post_job_form" style="max-width:700px; margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <input type="text" id="job_title" placeholder="Job Title" required style="grid-column: 1 / -1;">
+          <textarea id="job_details" placeholder="Full Job Description" required style="grid-column: 1 / -1; min-height: 100px;"></textarea>
+          <input type="text" id="job_location" placeholder="Location (e.g., Porur)" required>
+          <input type="number" id="job_pay" placeholder="Pay (e.g., 600)" required>
+          <select id="job_timing" required><option value="">Select Timing</option><option value="morning">Morning</option><option value="night">Night</option><option value="full-day">Full Day</option></select>
+          <select id="job_gender" required><option value="">Select Gender</option><option value="any">Any</option><option value="male">Male</option><option value="female">Female</option></select>
+          <select id="job_payment_mode" required style="grid-column: 1 / -1;"><option value="">Select Payment Mode</option><option value="spot">Spot Payment</option><option value="next-day">Next Day</option><option value="monthly">Monthly</option></select>
+          <input type="url" id="job_gmaps" placeholder="Google Maps Link (optional)" style="grid-column: 1 / -1;">
+          <button class="btn" type="submit" style="grid-column: 1 / -1;">Post Job</button>
+        </form>
+      </section>
+
+      <section id="dashboard" class="section">
+        <h2>Dashboard</h2>
+        <div class="dashboard-tabs">
+            <button data-tab="main" class="active role-user">Applied Jobs</button>
+            <button data-tab="main" class="active role-giver" style="display:none;">My Posted Jobs</button>
+            <button data-tab="saved" class="role-user">Saved Jobs</button>
+            <button data-tab="applicants" class="role-giver" style="display:none;">Applicants</button>
+        </div>
+        <p id="dashboard_intro" class="muted">Here's a summary of your activity.</p>
+        <div id="dashboard_content" class="grid" style="margin-top:18px"></div>
+      </section>
+      
+      <section id="profile" class="section">
+        <h2>My Profile</h2>
+        <div class="card profile-card" style="max-width:500px; margin: 18px auto;">
+            <img id="profile_pic" src="https://i.pravatar.cc/150" alt="Profile Picture">
+            <h3 id="profile_name"></h3>
+            <p class="muted"><strong>Email:</strong> <span id="profile_email"></span></p>
+            <p class="muted"><strong>Role:</strong> <span id="profile_role"></span></p>
+            <div class="row role-user" style="display: flex; align-items: center; justify-content:center; gap: 8px; margin-top: 16px;">
+                <label for="availability_toggle">Available Today?</label>
+                <input type="checkbox" id="availability_toggle" style="width: auto;">
+            </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      © 2025 Wedlify — Connecting students with opportunities.
+    </footer>
+
+    <button id="post_job_fab" class="btn">+</button>
+    
+    <nav class="mobile-nav">
+      <a href="#" data-section="home" class="active"><span class="icon">🏠</span> Home</a>
+      <a href="#" data-section="jobs"><span class="icon">🔍</span> Jobs</a>
+      <a href="#" data-section="dashboard" class="role-user"><span class="icon">⭐</span> Saved</a>
+      <a href="#" data-section="dashboard" class="role-giver" style="display:none;"><span class="icon">📊</span> Dashboard</a>
+      <a href="#" data-section="profile"><span class="icon">👤</span> Profile</a>
+    </nav>
+  </div>
+  
+  <div class="toast-wrap"></div>
+
+  <script type="module">
+    // --- FIREBASE SDK IMPORTS ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      getDoc,
+      addDoc,
+      query,
+      where,
+      getDocs,
+      orderBy,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // --- PASTE YOUR FIREBASE CONFIGURATION HERE ---
+    const firebaseConfig = {
+    apiKey: "AIzaSyAWm9iQ0519YmYKqF87-kX4IrPQoEfnFPI",
+    authDomain: "wedlify-jobs.firebaseapp.com",
+    projectId: "wedlify-jobs",
+    storageBucket: "wedlify-jobs.firebasestorage.app",
+    messagingSenderId: "236509542523",
+    appId: "1:236509542523:web:3137fb5f423036ec808ade"
+  };
+
+    // --- FIREBASE INITIALIZATION ---
+    let app, auth, db;
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+    } catch (e) {
+        console.error("Firebase initialization failed. Please provide your Firebase config.", e);
+        // Display a message to the user
+        document.body.innerHTML = `<div style="padding: 24px; text-align: center;"><h1>Configuration Error</h1><p>Please provide your Firebase project configuration in the script tag of index.html to run the application.</p></div>`;
+    }
+
+    // --- DOM SELECTORS ---
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+
+    // --- APP STATE ---
+    let currentUser = null;
+    let jobsCache = [];
+    let bookmarkedJobs = new Set();
+    let appliedJobIds = new Set();
+    let usersCache = {};
+
+
+    // --- CORE UI FUNCTIONS ---
+    function toast(msg, type = 'success') {
+      const wrap = $('.toast-wrap');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      
+      let finalMsg = msg;
+      // Add emoji if message doesn't start with one
+      if (!/^\p{Emoji}/u.test(msg)) {
+        const emoji = type === 'success' ? '✅' : '❌';
+        finalMsg = `${emoji} ${msg}`;
+      }
+      
+      t.textContent = finalMsg;
+      wrap.appendChild(t);
+      setTimeout(() => {
+        t.style.animation = 'fadeOut .3s ease forwards';
+        setTimeout(() => t.remove(), 300);
+      }, 3000);
+    }
+
+    function setActive(sectionId) {
+      $$('.section').forEach(s => s.classList.remove('active'));
+      if ($(`#${sectionId}`)) $(`#${sectionId}`).classList.add('active');
+      
+      const navLinks = $$('nav a[data-section]');
+      navLinks.forEach(a => {
+        const isMobileSavedTab = a.parentElement.classList.contains('mobile-nav') && a.dataset.section === 'dashboard' && currentUser?.role === 'user';
+        const isDashboardActive = sectionId.startsWith('dashboard');
+
+        let isActive = a.dataset.section === sectionId;
+        if (isMobileSavedTab && isDashboardActive) {
+            isActive = true;
+        }
+
+        a.classList.toggle('active', isActive);
+      });
+    }
+
+    function showView(viewId) {
+        $('#auth_view').classList.toggle('active', viewId === 'auth');
+        $('#app_view').classList.toggle('active', viewId === 'app');
+        $('#onboarding_splash').classList.toggle('active', viewId === 'onboarding');
+    }
+    
+    // --- AUTHENTICATION ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                currentUser = { uid: user.uid, ...userDocSnap.data() };
+                loadBookmarks();
+                await initializeAppForUser();
+            } else {
+                console.error("User document not found in Firestore.");
+                showView('auth');
+            }
+        } else {
+            currentUser = null;
+            if (localStorage.getItem('onboardingComplete')) {
+                showView('auth');
+            } else {
+                showView('onboarding');
+            }
+        }
+    });
+
+    $('#login_form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('#login_email').value;
+        const password = $('#login_password').value;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            toast('Logged in successfully!');
+        } catch (error) {
+            toast(error.message, 'error');
+        }
+    });
+
+    $('#signup_form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = $('#signup_name').value;
+        const email = $('#signup_email').value;
+        const password = $('#signup_password').value;
+        const role = $('#signup_role').value;
+        if (!role) {
+          toast('Please select a role.', 'error');
+          return;
+        }
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            await setDoc(doc(db, "users", user.uid), {
+                name: name,
+                email: email,
+                role: role,
+                available: role === 'user' ? true : false,
+                createdAt: serverTimestamp()
+            });
+            toast('Account created successfully!');
+        } catch (error) {
+            toast(error.message, 'error');
+        }
+    });
+
+    $('#logout_button').addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => {
+            toast('You have been logged out.');
+            window.location.reload();
+        });
+    });
+
+    // --- DATA FETCHING & RENDERING ---
+    async function fetchJobsAndRender() {
+        const container = $('#jobs_list');
+        if (!container) return;
+
+        // Show shimmer placeholders while loading
+        container.innerHTML = Array(6).fill('').map(() => `
+            <div class="card shimmer-card">
+                <div class="shimmer" style="height: 24px; width: 70%; margin-bottom: 12px;"></div>
+                <div class="shimmer" style="height: 16px; width: 40%;"></div>
+                <div class="shimmer" style="height: 40px; width: 100%; margin-top: 16px;"></div>
+                <div class="shimmer" style="height: 36px; width: 50%; margin-top: 24px; margin-left: auto;"></div>
+            </div>
+        `).join('');
+
+        try {
+            const jobsRef = collection(db, "jobs");
+            const q = query(jobsRef, orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            jobsCache = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            await fetchAndCacheGiverNames();
+            populateFilters();
+            renderJobs();
+        } catch (error) {
+            console.error("Error fetching jobs:", error);
+            container.innerHTML = `<p class="muted" style="grid-column: 1/-1; text-align: center;">Could not load jobs. Please try again later.</p>`;
+        }
+    }
+    
+    async function fetchAndCacheGiverNames() {
+        const giverIds = [...new Set(jobsCache.map(job => job.giverId).filter(Boolean))];
+        const giversToFetch = giverIds.filter(id => !usersCache[id]);
+
+        if (giversToFetch.length > 0) {
+            try {
+                const usersRef = collection(db, 'users');
+                // Firestore 'in' queries are limited to 30 items
+                for (let i = 0; i < giversToFetch.length; i += 30) {
+                    const chunk = giversToFetch.slice(i, i + 30);
+                    const q = query(usersRef, where('__name__', 'in', chunk));
+                    const querySnapshot = await getDocs(q);
+                    querySnapshot.forEach(doc => {
+                        usersCache[doc.id] = doc.data();
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching giver names:", error);
+            }
+        }
+    }
+    
+    function populateFilters() {
+        const locations = [...new Set(jobsCache.map(job => job.location))];
+        const locFilter = $('#filter_location');
+        locFilter.innerHTML = '<option value="">All Locations</option>'; // Reset
+        locations.forEach(loc => {
+            const option = document.createElement('option');
+            option.value = loc;
+            option.textContent = loc;
+            locFilter.appendChild(option);
+        });
+    }
+
+    function renderJobs() {
+      const container = $('#jobs_list');
+      if (!container) return;
+
+      const searchTerm = $('#search_box').value.toLowerCase();
+      const locationFilter = $('#filter_location').value;
+      const payFilter = $('#filter_pay').value;
+      const timingFilter = $('#filter_timing').value;
+      const genderFilter = $('#filter_gender').value;
+
+      const filteredJobs = jobsCache.filter(job => {
+          const giverName = usersCache[job.giverId]?.name || 'Unknown';
+          const matchesSearch = job.title.toLowerCase().includes(searchTerm) || job.details.toLowerCase().includes(searchTerm) || job.location.toLowerCase().includes(searchTerm) || giverName.toLowerCase().includes(searchTerm);
+          const matchesLocation = !locationFilter || job.location === locationFilter;
+          const matchesTiming = !timingFilter || job.timing === timingFilter;
+          const matchesGender = !genderFilter || job.gender === genderFilter || job.gender === 'any';
+          const matchesPay = !payFilter || (payFilter === '500' && job.pay <= 500) || (payFilter === '1000' && job.pay > 500 && job.pay <= 1000) || (payFilter === '1001' && job.pay > 1000);
+          return matchesSearch && matchesLocation && matchesTiming && matchesPay && matchesGender;
+      });
+
+      $('#jobs_count').textContent = `Showing ${filteredJobs.length} of ${jobsCache.length} jobs`;
+
+      if (filteredJobs.length === 0) {
+        container.innerHTML = `<p class="muted" style="grid-column: 1/-1; text-align: center;">No jobs found matching your criteria. Try adjusting your filters.</p>`;
+        return;
+      }
+
+      container.innerHTML = filteredJobs.map(job => {
+          const giverName = usersCache[job.giverId]?.name || 'A Reputed Company';
+          const isBookmarked = bookmarkedJobs.has(job.id);
+          const hasApplied = appliedJobIds.has(job.id);
+          const payModeClass = job.paymentMode?.toLowerCase().replace(/\s+/g, '-');
+
+          return `
+            <div class="card job-card" data-job-id="${job.id}">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <h3 style="margin-bottom: 4px;">${job.title}</h3>
+                <button class="bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" aria-label="Bookmark job" data-job-id="${job.id}">⭐</button>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px;">
+                  <div class="pill">📍 ${job.location}</div>
+                  <div class="pill">₹${job.pay}</div>
+                  ${job.paymentMode ? `<div class="pill ${payModeClass}">${job.paymentMode}</div>` : ''}
+              </div>
+              <p>${job.details}</p>
+              ${job.gmapsLink ? `<a href="${job.gmapsLink}" target="_blank" rel="noopener noreferrer" class="muted" style="font-size: 13px; text-decoration: underline;">View on Map 🗺️</a>` : ''}
+              <div class="card-footer">
+                <small class="muted">Posted by ${giverName}</small>
+                <button class="btn quick-apply-btn" data-job-id="${job.id}" ${hasApplied ? 'disabled' : ''}>${hasApplied ? 'Applied ✔' : 'Quick Apply'}</button>
+              </div>
+            </div>
+          `;
+      }).join('');
+    }
+
+    // --- JOB ACTIONS ---
+    async function applyForJob(jobId) {
+        if (!currentUser) {
+            toast('You must be logged in to apply.', 'error');
+            return;
+        }
+        if (appliedJobIds.has(jobId)) {
+            toast('You have already applied for this job.', 'error');
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, "applications"), {
+                jobId: jobId,
+                userId: currentUser.uid,
+                timestamp: serverTimestamp()
+            });
+            appliedJobIds.add(jobId);
+            const btn = $(`button.quick-apply-btn[data-job-id="${jobId}"]`);
+            if(btn) {
+                btn.textContent = 'Applied ✔';
+                btn.disabled = true;
+            }
+            toast('Application submitted successfully!');
+        } catch (error) {
+            toast('Failed to apply. Please try again.', 'error');
+            console.error("Error applying for job: ", error);
+        }
+    }
+    
+    function toggleBookmark(jobId) {
+        const btn = $(`.bookmark-btn[data-job-id="${jobId}"]`);
+        if (bookmarkedJobs.has(jobId)) {
+            bookmarkedJobs.delete(jobId);
+            btn?.classList.remove('bookmarked');
+        } else {
+            bookmarkedJobs.add(jobId);
+            btn?.classList.add('bookmarked');
+        }
+        localStorage.setItem(`bookmarkedJobs_${currentUser.uid}`, JSON.stringify([...bookmarkedJobs]));
+    }
+    
+    function loadBookmarks() {
+        const saved = localStorage.getItem(`bookmarkedJobs_${currentUser.uid}`);
+        if (saved) {
+            bookmarkedJobs = new Set(JSON.parse(saved));
+        }
+    }
+
+    $('#post_job_form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = $('#job_title').value.trim();
+        const details = $('#job_details').value.trim();
+        const location = $('#job_location').value.trim();
+        const pay = $('#job_pay').value;
+        const timing = $('#job_timing').value;
+        const gender = $('#job_gender').value;
+        const paymentMode = $('#job_payment_mode').value;
+        const gmapsLink = $('#job_gmaps').value.trim();
+        
+        if (!title || !details || !location || !pay || !timing || !gender || !paymentMode) {
+            toast('Please fill all required fields.', 'error');
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, "jobs"), {
+                title, details, location,
+                pay: Number(pay),
+                timing, gender, paymentMode, gmapsLink,
+                giverId: currentUser.uid,
+                createdAt: serverTimestamp()
+            });
+            toast('🎉 Job posted successfully!');
+            $('#post_job_form').reset();
+            setActive('jobs');
+            fetchJobsAndRender();
+        } catch (error) {
+            toast('Failed to post job. Please try again.', 'error');
+            console.error("Error posting job: ", error);
+        }
+    });
+
+    // --- DASHBOARD ---
+    async function renderDashboard(tab = 'main') {
+        const content = $('#dashboard_content');
+        content.innerHTML = `<p class="muted">Loading dashboard...</p>`;
+        
+        $$('.dashboard-tabs button').forEach(b => b.classList.remove('active'));
+        $(`.dashboard-tabs button[data-tab="${tab}"]`).classList.add('active');
+
+        if (currentUser.role === 'user') {
+            if (tab === 'main') { // Applied Jobs
+                $('#dashboard_intro').textContent = "You have applied to these jobs.";
+                const appsQuery = query(collection(db, "applications"), where("userId", "==", currentUser.uid));
+                const appsSnapshot = await getDocs(appsQuery);
+                const jobIds = appsSnapshot.docs.map(doc => doc.data().jobId);
+                
+                if (jobIds.length === 0) {
+                    content.innerHTML = `<p class="muted">You haven't applied to any jobs yet.</p>`;
+                    return;
+                }
+                
+                const appliedJobs = jobsCache.filter(job => jobIds.includes(job.id));
+                content.innerHTML = appliedJobs.map(job => renderMiniJobCard(job)).join('') || `<p class="muted">No applied jobs found.</p>`;
+            } else if (tab === 'saved') { // Saved Jobs
+                $('#dashboard_intro').textContent = "Your bookmarked jobs are here.";
+                const saved = jobsCache.filter(job => bookmarkedJobs.has(job.id));
+                content.innerHTML = saved.map(job => renderMiniJobCard(job, true)).join('') || `<p class="muted">You haven't bookmarked any jobs yet. Click the ⭐ icon to save jobs.</p>`;
+            }
+        } else if (currentUser.role === 'giver') {
+            if (tab === 'main') { // My Posted Jobs
+                 $('#dashboard_intro').textContent = "Jobs you have posted.";
+                 const myJobs = jobsCache.filter(job => job.giverId === currentUser.uid);
+                 content.innerHTML = myJobs.map(job => renderMiniJobCard(job)).join('') || `<p class="muted">You haven't posted any jobs yet.</p>`;
+            } else if (tab === 'applicants') { // Applicants
+                $('#dashboard_intro').textContent = "Students who have applied to your jobs.";
+                const myJobIds = jobsCache.filter(job => job.giverId === currentUser.uid).map(j => j.id);
+
+                if (myJobIds.length === 0) {
+                    content.innerHTML = `<p class="muted">No applicants yet. Post a job to get started!</p>`;
+                    return;
+                }
+                const appsQuery = query(collection(db, "applications"), where("jobId", "in", myJobIds));
+                const appsSnapshot = await getDocs(appsQuery);
+                const applicants = appsSnapshot.docs.map(doc => doc.data());
+                
+                if (applicants.length === 0) {
+                    content.innerHTML = `<p class="muted">No one has applied to your jobs yet.</p>`;
+                    return;
+                }
+                
+                const applicantUserIds = [...new Set(applicants.map(app => app.userId))];
+                await fetchAndCacheUserNames(applicantUserIds);
+                
+                content.innerHTML = applicants.map(app => {
+                    const job = jobsCache.find(j => j.id === app.jobId);
+                    const user = usersCache[app.userId];
+                    if (!job || !user) return '';
+                    return `
+                        <div class="card">
+                            <h4>${user.name}</h4>
+                            <p class="muted">Applied for: <strong>${job.title}</strong></p>
+                            <a href="mailto:${user.email}" class="btn alt" style="margin-top: auto; max-width: 150px;">Contact</a>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    }
+    
+    function renderMiniJobCard(job, isBookmark = false) {
+        return `
+            <div class="card">
+                <h4>${job.title}</h4>
+                <p class="muted">${job.location} • ₹${job.pay}</p>
+                <div class="card-footer" style="margin-top: 12px;">
+                    <a href="#" class="btn" data-section="jobs" onclick="document.getElementById('search_box').value='${job.title}'; document.getElementById('search_box').dispatchEvent(new Event('input'));">View Job</a>
+                    ${isBookmark ? `<button class="bookmark-btn bookmarked" data-job-id="${job.id}">⭐</button>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    async function fetchAndCacheUserNames(userIds) {
+        const usersToFetch = userIds.filter(id => !usersCache[id]);
+        if (usersToFetch.length > 0) {
+            for (let i = 0; i < usersToFetch.length; i += 30) {
+                const chunk = usersToFetch.slice(i, i + 30);
+                const usersQuery = query(collection(db, "users"), where("__name__", "in", chunk));
+                const usersSnapshot = await getDocs(usersQuery);
+                usersSnapshot.forEach(doc => {
+                    usersCache[doc.id] = doc.data();
+                });
+            }
+        }
+    }
+
+    // --- PROFILE ---
+    function updateProfileDisplay() {
+        if (!currentUser) return;
+        $('#profile_name').textContent = currentUser.name;
+        $('#profile_email').textContent = currentUser.email;
+        $('#profile_role').textContent = currentUser.role === 'user' ? 'Job Seeker' : 'Job Giver';
+        $('#profile_pic').src = `https://i.pravatar.cc/150?u=${currentUser.uid}`;
+        if (currentUser.role === 'user') {
+            $('#availability_toggle').checked = currentUser.available;
+        }
+    }
+
+    // --- INITIALIZATION ---
+    async function initializeAppForUser() {
+        showView('app');
+        setActive('home');
+        
+        // Setup UI based on role
+        const isGiver = currentUser.role === 'giver';
+        $$('.role-giver').forEach(el => el.style.display = isGiver ? 'flex' : 'none');
+        $$('.role-user').forEach(el => el.style.display = !isGiver ? 'flex' : 'none');
+        $('#post_job_fab').classList.toggle('visible', isGiver);
+        
+        if (isGiver) {
+            $('.mobile-nav a[data-section="dashboard"]').innerHTML = `<span class="icon">📊</span> Dashboard`;
+        } else {
+            $('.mobile-nav a[data-section="dashboard"]').innerHTML = `<span class="icon">⭐</span> Saved`;
+        }
+
+        $('#welcome_heading').textContent = `Welcome back, ${currentUser.name.split(' ')[0]}!`;
+        $('#welcome_subheading').textContent = isGiver ? "Post a job to find the best talent." : "Your next job opportunity is just a click away.";
+        
+        updateProfileDisplay();
+
+        // Fetch user's applications
+        if (currentUser.role === 'user') {
+            const appsQuery = query(collection(db, "applications"), where("userId", "==", currentUser.uid));
+            const appsSnapshot = await getDocs(appsQuery);
+            appliedJobIds = new Set(appsSnapshot.docs.map(doc => doc.data().jobId));
+        }
+
+        await fetchJobsAndRender();
+        await renderDashboard(); // Initial dashboard render
+    }
+
+    // --- EVENT LISTENERS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Theme toggle
+        const themeToggle = $('#theme_toggle');
+        const sunIcon = '☀️';
+        const moonIcon = '🌙';
+
+        const applyTheme = (theme) => {
+            document.documentElement.dataset.theme = theme;
+            themeToggle.textContent = theme === 'light' ? moonIcon : sunIcon;
+            localStorage.setItem('theme', theme);
+        };
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+        });
+
+        // Apply saved theme on load
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+
+        // Auth form toggle
+        $('#show_signup').addEventListener('click', () => {
+            $('#login_form').style.display = 'none';
+            $('#signup_form').style.display = 'grid';
+        });
+        $('#show_login').addEventListener('click', () => {
+            $('#signup_form').style.display = 'none';
+            $('#login_form').style.display = 'grid';
+        });
+        
+        // Onboarding
+        $('#start_onboarding_btn').addEventListener('click', () => {
+            localStorage.setItem('onboardingComplete', 'true');
+            $('#onboarding_splash').classList.add('fading-out');
+            setTimeout(() => showView('auth'), 400);
+        });
+
+        // Navigation
+        $$('nav a[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = link.dataset.section;
+                setActive(sectionId);
+                if (sectionId === 'dashboard') {
+                    const defaultTab = currentUser.role === 'user' ? 'main' : 'main';
+                    renderDashboard(defaultTab);
+                }
+            });
+        });
+        
+        // FAB to post job
+        $('#post_job_fab').addEventListener('click', () => setActive('post_job'));
+
+        // Dashboard tabs
+        $$('.dashboard-tabs button').forEach(button => {
+            button.addEventListener('click', () => renderDashboard(button.dataset.tab));
+        });
+        
+        // Job actions (delegated)
+        document.body.addEventListener('click', (e) => {
+            if (e.target.matches('.quick-apply-btn')) {
+                applyForJob(e.target.dataset.jobId);
+            }
+            if (e.target.matches('.bookmark-btn')) {
+                toggleBookmark(e.target.dataset.jobId);
+                // If on saved dashboard, re-render
+                if ($('#dashboard.active') && $('.dashboard-tabs button[data-tab="saved"].active')) {
+                    renderDashboard('saved');
+                }
+            }
+        });
+
+        // Filters
+        $$('.filters input, .filters select').forEach(input => {
+            input.addEventListener('input', renderJobs);
+        });
+
+        // Availability toggle
+        $('#availability_toggle').addEventListener('change', async (e) => {
+            const isAvailable = e.target.checked;
+            const userRef = doc(db, "users", currentUser.uid);
+            try {
+                await setDoc(userRef, { available: isAvailable }, { merge: true });
+                currentUser.available = isAvailable; // Update local state
+                toast(`Availability updated to: ${isAvailable ? 'Available' : 'Busy'}`);
+            } catch (error) {
+                toast('Failed to update availability.', 'error');
+                e.target.checked = !isAvailable; // Revert checkbox on failure
+            }
+        });
+    });
+
+  </script>
 </body>
 </html>
